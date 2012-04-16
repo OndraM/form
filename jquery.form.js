@@ -178,6 +178,12 @@ $.fn.ajaxSubmit = function(options) {
     var multipart = ($form.attr('enctype') == mp || $form.attr('encoding') == mp);
 
     var fileAPI = feature.fileapi && feature.formdata;
+    
+    // Don't use fileAPI when sending none files - fallback to iframe. See #180.
+    if (!a.length) {
+        fileAPI = false;
+    }
+    
     log("fileAPI :" + fileAPI);
     var shouldUseFrame = (hasFileInputs || multipart) && !fileAPI;
 
@@ -808,14 +814,8 @@ $.fn.formToArray = function(semantic, elements) {
             if (elements) 
                 elements.push(el);
             var files = el.files;
-            if (files.length) {
-                for (j=0; j < files.length; j++) {
-                    a.push({name: n, value: files[j], type: el.type});
-                }
-            }
-            else {
-                // #180
-                a.push({ name: n, value: '', type: el.type });
+            for (j=0; j < files.length; j++) {
+                a.push({name: n, value: files[j], type: el.type});
             }
         }
         else if (v !== null && typeof v != 'undefined') {
